@@ -1,6 +1,8 @@
+import os
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from joblib import delayed, Parallel
 
 
 def histplot_ratio(sdata, figsize=(25, 6), title='ratio', color='lightblue'):
@@ -42,3 +44,22 @@ def histplot_ratio(sdata, figsize=(25, 6), title='ratio', color='lightblue'):
         plt.bar(hist_bins_data['edges'][i], hist_bins_data['ratio'][i], width=width, alpha=0.5, color=color)
     plt.title(title)
     plt.show()
+
+
+def parallelize(fn, parameters, n_jobs=os.cpu_count()-2):
+    """
+    fn: function to parallelize
+    n_jobs: number of cores to use
+    parameter: a zip of parameters
+    return: the results of the function in array
+
+    eg.
+        def y_fn(x):
+            ...
+            return ...
+
+        x_arr = np.logspace(0, 6, 100)
+        y_arr = parallelize(y_fn, x_arr)
+    """
+    parameters = zip(parameters) if not isinstance(parameters, zip) else parameters
+    return Parallel(n_jobs)(delayed(fn)(*p) for p in parameters)
